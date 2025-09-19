@@ -28,3 +28,4 @@ pico_enable_stdio_uart(${PROJECT_NAME} 1)
 
 # Crear archivo .uf2
 pico_add_extra_outputs(${PROJECT_NAME})
+
