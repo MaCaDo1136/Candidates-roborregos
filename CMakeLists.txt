@@ -34,8 +34,11 @@ project(Candidates_Roborregos_CPP C CXX ASM)
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
+file(GLOB_RECURSE PROJECT_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
+)
 
-add_executable(Candidates_Roborregos_CPP Candidates_Roborregos_CPP.cpp )
+add_executable(Candidates_Roborregos_CPP ${PROJECT_SOURCES})
 
 pico_set_program_name(Candidates_Roborregos_CPP "Candidates_Roborregos_CPP")
 pico_set_program_version(Candidates_Roborregos_CPP "0.1")
@@ -59,6 +62,7 @@ target_link_libraries(Candidates_Roborregos_CPP
 # Add the standard include files to the build
 target_include_directories(Candidates_Roborregos_CPP PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/headers
 )
 
 pico_add_extra_outputs(Candidates_Roborregos_CPP)
