@@ -7,6 +7,10 @@
 #include "InterruptManager.h"
 #include "PrintTerminal.h"
 #include "Sensors/Sensors.h"
+#include "Motors/Motor.h"
+
+#define WHEEL_RADIOUS 3.25
+#define WHEEL_BASE 20
 
 // Pin definitions
 
@@ -19,6 +23,7 @@
 // P5 → Motor_Right_IN3
 // P6 → Motor_Right_IN4
 // P7 → Motor_Right_ENB (PWM)
+#define I2C_PORT i2c0
 #define I2C_SDA 22
 #define I2C_SCL 26
 
@@ -31,6 +36,9 @@
 
 #define ULTRASONIC3_TRIG 19 // GPIO19 →
 #define ULTRASONIC3_ECHO 18 // GPIO18 →
+
+#define ULTRASONIC4_TRIG 17
+#define ULTRASONIC4_ECHO 16
 
 // Sensores para linea
 #define LINE_SENSOR1 1 // GPIO1 → TCRT5000 #1 OUT
@@ -55,12 +63,17 @@
 
 // Encoders
 #define ENCODER1 13 // GPIO13 → LM393 #1 OUT
-#define ENCODER2 15 // GPIO15 → LM393 #2 OUT
+#define ENCODER2 14 // GPIO15 → LM393 #2 OUT
 
 // Led de estatus
 #define STATUS_LED 25 // GPIO27 → LED indicator
 
+#define MOTOR_INTAKE_ENA 2
+#define MOTOR_INTAKE_IN1 3
+#define MOTOR_INTAKE_IN2 4
+
 // Setup callback function to blink status led
+
 volatile bool led_state = false;
 bool status_led_callback(repeating_timer_t *rt)
 {
@@ -103,10 +116,12 @@ int main()
     encoder_sensor2.init();
 
     // Init Color GPIOs
+    /*
     ColorSensor color_sensor1 = ColorSensor(COLOR1_S0, COLOR1_S1, COLOR1_S2, COLOR1_S3, COLOR1_OUT);
     ColorSensor color_sensor2 = ColorSensor(COLOR2_S0, COLOR2_S1, COLOR2_S2, COLOR2_S3, COLOR2_OUT);
     color_sensor1.init();
-    color_sensor1.init();
+    color_sensor2.init();
+    */
     ColorSensor::startTimerManager();
 
     // Init PIR Sensor
@@ -124,24 +139,41 @@ int main()
     UltrasonicSensor ultra_sensor1 = UltrasonicSensor(ULTRASONIC1_TRIG, ULTRASONIC1_ECHO);
     UltrasonicSensor ultra_sensor2 = UltrasonicSensor(ULTRASONIC2_TRIG, ULTRASONIC2_ECHO);
     UltrasonicSensor ultra_sensor3 = UltrasonicSensor(ULTRASONIC3_TRIG, ULTRASONIC3_ECHO);
+    UltrasonicSensor ultra_sensor4 = UltrasonicSensor(ULTRASONIC4_TRIG, ULTRASONIC4_ECHO);
     ultra_sensor1.init();
     ultra_sensor2.init();
     ultra_sensor3.init();
+    ultra_sensor4.init();
     UltrasonicSensor::startTimerManager();
 
+    // Intake motor
+    Motor motor_intake = Motor(MOTOR_INTAKE_ENA, MOTOR_INTAKE_IN1, MOTOR_INTAKE_IN2);
+    motor_intake.init();
+    motor_intake.forward();
+    motor_intake.setSpeed(50);
+
     // Init print to terminal
+    /*
     PrintTerminal printer = PrintTerminal();
+    */
+    /*
     printer.attachSensor(&encoder_sensor1);
     printer.attachSensor(&encoder_sensor2);
+    */
+    /*
     printer.attachSensor(&color_sensor1);
     printer.attachSensor(&color_sensor2);
     printer.attachSensor(&line_sensor1);
     printer.attachSensor(&line_sensor2);
+
     printer.attachSensor(&ultra_sensor1);
     printer.attachSensor(&ultra_sensor2);
     printer.attachSensor(&ultra_sensor3);
+    printer.attachSensor(&ultra_sensor4);
+    */
+    /*
     printer.startTimer();
-
+    */
     // Setup printing to terminal through timer
     /*
     repeating_timer_t terminal_timer;

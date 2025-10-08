@@ -15,7 +15,8 @@ void UltrasonicSensor::init()
     gpio_put(trig_pin_, 0);
     gpio_init(echo_pin_);
     gpio_set_dir(echo_pin_, GPIO_IN);
-    InterruptManager::attach(echo_pin_, GPIO_IRQ_EDGE_RISE, &UltrasonicSensor::staticInterruptHandler);
+    instances[echo_pin_] = this;
+    InterruptManager::attach(echo_pin_, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, &UltrasonicSensor::staticInterruptHandler);
     registerSensor(this);
 };
 

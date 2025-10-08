@@ -9,7 +9,7 @@ int ColorSensor::current_sensor_index = 0;
 int ColorSensor::current_filter_ = 0;
 repeating_timer_t ColorSensor::color_timer;
 
-ColorSensor::ColorSensor(uint s0, uint s1, uint s2, uint s3, uint out_pin) : s0_(s0), s1_(s1), s2_(s2), s3_(s3), out_pin_(out_pin_) {};
+ColorSensor::ColorSensor(uint s0, uint s1, uint s2, uint s3, uint out_pin) : s0_(s0), s1_(s1), s2_(s2), s3_(s3), out_pin_(out_pin) {};
 
 void ColorSensor::init()
 {
