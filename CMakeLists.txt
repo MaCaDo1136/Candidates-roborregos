@@ -1,31 +1,69 @@
+# Generated Cmake Pico project file
+
 cmake_minimum_required(VERSION 3.13)
 
-# Nombre del proyecto
-project(candidates-roborregos C CXX ASM)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Ruta del SDK
-set(PICO_SDK_PATH "/home/mario/pico/pico-sdk")
+# Initialise pico_sdk from installed location
+# (note this can come from environment, CMake cache etc)
 
-# Incluir el SDK
+# == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
+if(WIN32)
+    set(USERHOME $ENV{USERPROFILE})
+else()
+    set(USERHOME $ENV{HOME})
+endif()
+set(sdkVersion 2.2.0)
+set(toolchainVersion RISCV_ZCB_RPI_2_1_1_3)
+set(picotoolVersion 2.2.0)
+set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
+if (EXISTS ${picoVscode})
+    include(${picoVscode})
+endif()
+# ====================================================================================
+set(PICO_BOARD pico2 CACHE STRING "Board type")
+
+# Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-# Inicializar el SDK
+project(Candidates_Roborregos_CPP C CXX ASM)
+
+# Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-# Añadir tu ejecutable
-add_executable(${PROJECT_NAME}
-    main.cpp
+# Add executable. Default name is the project name, version 0.1
+file(GLOB_RECURSE PROJECT_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
 )
 
-# Incluir librerías estándar de Pico
-target_link_libraries(${PROJECT_NAME} pico_stdlib)
+add_executable(Candidates_Roborregos_CPP ${PROJECT_SOURCES})
 
-# Habilitar UART para 'printf'
-pico_enable_stdio_uart(${PROJECT_NAME} 1)
+pico_set_program_name(Candidates_Roborregos_CPP "Candidates_Roborregos_CPP")
+pico_set_program_version(Candidates_Roborregos_CPP "0.1")
 
-# Habilitar USB si quieres
-# pico_enable_stdio_usb(${PROJECT_NAME} 1)
+# Modify the below lines to enable/disable output over UART/USB
+pico_enable_stdio_uart(Candidates_Roborregos_CPP 0)
+pico_enable_stdio_usb(Candidates_Roborregos_CPP 1)
 
-# Crear archivo .uf2
-pico_add_extra_outputs(${PROJECT_NAME})
+# Add the standard library to the build
+target_link_libraries(Candidates_Roborregos_CPP
+    pico_stdlib
+    hardware_timer
+    hardware_pwm
+    hardware_i2c
+    hardware_gpio     
+)
+
+
+
+
+# Add the standard include files to the build
+target_include_directories(Candidates_Roborregos_CPP PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/headers
+)
+
+pico_add_extra_outputs(Candidates_Roborregos_CPP)
 
