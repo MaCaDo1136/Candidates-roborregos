@@ -1,10 +1,13 @@
 #include <Arduino.h>
+#include <TimerOne.h>
+
 #include <MyLED.h>
 
 MyLED *myLed;
 
 void setup()
 {
+
   // pinMode(LED_BUILTIN, OUTPUT); // Initialize the digital pin as an output
   myLed = new MyLED(LED_BUILTIN);
 }
