@@ -9,7 +9,7 @@ public:
     void init();
     static void timerChecker();
     static void attachSensor(LineSensor *sens);
-
+    void handleInterrupt();
     bool isLineDetected() const;
 
     void printValue() override
@@ -20,5 +20,6 @@ public:
 private:
     int pin_;
     volatile bool line_detected_ = false;
-    static LineSensor *instances[30];
+    static int amountSensors;
+    static LineSensor *instances[10];
 };

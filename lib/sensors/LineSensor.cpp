@@ -3,9 +3,13 @@
 // #include "hardware/gpio.h"
 // #include "InterruptManager.h"
 
+LineSensor *LineSensor::instances[10] = {nullptr};
+int LineSensor::amountSensors = 0;
+
 LineSensor::LineSensor(int pin)
 {
     pin_ = pin;
+    attachSensor(this);
 };
 
 void LineSensor::init()
@@ -15,34 +19,24 @@ void LineSensor::init()
 
 void LineSensor::timerChecker()
 {
+    for (LineSensor *instance : instances)
+    {
+        instance->handleInterrupt();
+    }
 }
 
-/*
-void LineSensor::handleInterrrupt()
+void LineSensor::handleInterrupt()
 {
     line_detected_ = digitalRead(pin_);
 }
-*/
-/*
-void LineSensor::handleInterrupt(uint gpio, uint32_t events)
-{
-    if (gpio == pin_)
-    {
-        line_detected_ = gpio_get(pin_);
-    }
-};
 
 bool LineSensor::isLineDetected() const
 {
     return line_detected_;
 };
 
-void LineSensor::staticInterruptHandler(uint gpio, uint32_t events)
+void LineSensor::attachSensor(LineSensor *sens)
 {
-    if (gpio < 30 && instances[gpio])
-    {
-        instances[gpio]->handleInterrupt(gpio, events);
-    }
+    instances[amountSensors] = sens;
+    amountSensors++;
 }
-*/
-LineSensor *LineSensor::instances[30] = {nullptr};
