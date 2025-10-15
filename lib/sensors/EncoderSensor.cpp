@@ -11,9 +11,11 @@ void EncoderSensor::init()
 {
     pinMode(pin_, INPUT);
     // Checking that the encoder work correctly
-    instances[pin_] = this;
+    instances[pin_%2] = this;
     attachInterrupt(digitalPinToInterrupt(pin_), staticInterruptHandler, CHANGE);
 };
+
+
 
 /*
 void EncoderSensor::handleInterrupt(uint gpio, uint32_t events)

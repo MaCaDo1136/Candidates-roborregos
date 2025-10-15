@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <TimerOne.h>
-#include <TimerTwo.h>
+// #include <TimerTwo.h>
 #include <LineSensor.h>
 #include <Constants.h>
 #include <MyLED.h>
@@ -11,12 +11,13 @@ LineSensor *line_sensor2;
 
 void setup()
 {
+  Serial.begin(9600);
   // Timer for line_sensors
   line_sensor1 = new LineSensor(LINESENSOR_LEFT);
   line_sensor1->init();
   line_sensor2 = new LineSensor(LINESENSOR_RIGHT);
   line_sensor2->init();
-  Timer1.initialize(2000);
+  Timer1.initialize(200);
   Timer1.attachInterrupt(LineSensor::timerChecker);
 
   // pinMode(LED_BUILTIN, OUTPUT); // Initialize the digital pin as an output
@@ -28,6 +29,8 @@ void loop()
   myLed->turnOn();
   delay(500);
   myLed->turnOff();
+  Serial.println(line_sensor1->isLineDetected());
+  Serial.println(line_sensor2->isLineDetected());
   delay(500);
 
   /*
