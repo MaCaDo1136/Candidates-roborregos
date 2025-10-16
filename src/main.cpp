@@ -7,6 +7,8 @@
 #include <Constants.h>
 #include <MyLED.h>
 
+// Easter egg
+
 MyLED *myLed;
 LineSensor *line_left;
 LineSensor *line_right;
@@ -23,18 +25,20 @@ void printing()
   // Serial.println(line_left->isLineDetected());
   // Serial.println("line right:");
   // Serial.println(line_right->isLineDetected());
-  // Serial.println("Left encoder:");
-  // Serial.println(encoder_left->getCount());
-  // Serial.println("Right encoder:");
-  // Serial.println(encoder_right->getCount());
-  Serial.println("Ultrasonic front up:");
-  Serial.println(ultrasonic_frontUp->getDistance());
-  Serial.println("Ultrasonic front down:");
-  Serial.println(ultrasonic_frontDown->getDistance());
-  Serial.println("Ultrasonic left:");
-  Serial.println(ultrasonic_left->getDistance());
-  Serial.println("Ultrasonic right:");
-  Serial.println(ultrasonic_right->getDistance());
+  Serial.println("L: ");
+  Serial.println(encoder_left->getCount());
+  Serial.println("R: ");
+  Serial.println(encoder_right->getCount());
+  // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_LEFT));
+  // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_RIGHT));
+  //   Serial.println("Ultrasonic front up:");
+  //   Serial.println(ultrasonic_frontUp->getDistance());
+  //   Serial.println("Ultrasonic front down:");
+  //   Serial.println(ultrasonic_frontDown->getDistance());
+  //   Serial.println("Ultrasonic left:");
+  //   Serial.println(ultrasonic_left->getDistance());
+  //   Serial.println("Ultrasonic right:");
+  //   Serial.println(ultrasonic_right->getDistance());
 }
 
 void setup()
@@ -73,7 +77,7 @@ void setup()
   myLed = new MyLED(LED_BUILTIN);
 
   // Set up printing with soft timer
-  myTimer.createTimer(500, printing, true);
+  myTimer.createTimer(100, printing, true);
   // Finally start all timers
   myTimer.startAllTimers();
 }

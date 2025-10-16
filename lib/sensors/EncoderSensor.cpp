@@ -12,11 +12,11 @@ void EncoderSensor::init()
     pinMode(pin_, INPUT);
     // Checking that the encoder work correctly
     instances[pin_ % 2] = this;
-    if (digitalPinToInterrupt(pin_) && pin_ % 2 == 0)
+    if (pin_ % 2 == 0)
     {
         attachInterrupt(digitalPinToInterrupt(pin_), EncoderSensor::interrupt0Handler, RISING);
     }
-    else if (digitalPinToInterrupt(pin_) && pin_ % 2 == 1)
+    else if (pin_ % 2 == 1)
     {
         attachInterrupt(digitalPinToInterrupt(pin_), EncoderSensor::interrupt1Handler, RISING);
     }
