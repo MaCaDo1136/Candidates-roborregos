@@ -47,7 +47,7 @@ void setup()
   line_left->init();
   line_right = new LineSensor(LINESENSOR_RIGHT);
   line_right->init();
-  myTimer.init(100);
+  myTimer.init(50);
   myTimer.createTimer(10, LineSensor::timerChecker, true);
   // pinMode(LINESENSOR_LEFT, INPUT_PULLUP);
   // pinMode(LINESENSOR_RIGHT, INPUT_PULLUP);
