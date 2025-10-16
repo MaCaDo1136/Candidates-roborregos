@@ -56,7 +56,7 @@ void setup()
 void loop()
 {
   myLed->turnOn();
-  delay(150);
+  delay(200);
   myLed->turnOff();
   // Serial.println("line left:");
   // Serial.println(line_left->isLineDetected());
@@ -75,7 +75,7 @@ void loop()
   Serial.println("Ultrasonic right:");
   Serial.println(ultrasonic_right->getDistance());
 
-  delay(150);
+  delay(200);
 
   /*
   digitalWrite(LED_BUILTIN, HIGH); // Turn the LED on
