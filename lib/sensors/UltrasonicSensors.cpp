@@ -74,3 +74,11 @@ void UltrasonicSensor::handleEchoInterrupt() {
     // echo_received_ = true;
     // last_distance_ = getDistance();
 };
+
+void UltrasonicSensor::attachSensor(UltrasonicSensor *sens)
+{
+    if (amountSensors < 20)
+    {
+        instances[amountSensors++] = sens;
+    }
+}

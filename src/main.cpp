@@ -3,6 +3,7 @@
 // #include <TimerTwo.h>
 #include <LineSensor.h>
 #include <EncoderSensor.h>
+#include <UltrasonicSensor.h>
 #include <Constants.h>
 #include <MyLED.h>
 
@@ -11,6 +12,10 @@ LineSensor *line_left;
 LineSensor *line_right;
 EncoderSensor *encoder_left;
 EncoderSensor *encoder_right;
+UltrasonicSensor *ultrasonic_frontUp;
+UltrasonicSensor *ultrasonic_frontDown;
+UltrasonicSensor *ultrasonic_left;
+UltrasonicSensor *ultrasonic_right;
 
 void setup()
 {
@@ -34,6 +39,16 @@ void setup()
   encoder_right = new EncoderSensor(ENCODERSENSOR_RIGHT);
   encoder_right->init();
 
+  // Init Ultrasonic sensors
+  ultrasonic_frontUp = new UltrasonicSensor(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
+  ultrasonic_frontUp->init();
+  ultrasonic_frontDown = new UltrasonicSensor(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO);
+  ultrasonic_frontDown->init();
+  ultrasonic_left = new UltrasonicSensor(ULTRASONIC_LEFT_TRIG, ULTRASONIC_LEFT_ECHO);
+  ultrasonic_left->init();
+  ultrasonic_right = new UltrasonicSensor(ULTRASONIC_RIGHT_TRIG, ULTRASONIC_RIGHT_ECHO);
+  ultrasonic_right->init();
+
   // pinMode(LED_BUILTIN, OUTPUT); // Initialize the digital pin as an output
   myLed = new MyLED(LED_BUILTIN);
 }
@@ -43,10 +58,22 @@ void loop()
   myLed->turnOn();
   delay(150);
   myLed->turnOff();
+  // Serial.println("line left:");
   // Serial.println(line_left->isLineDetected());
+  // Serial.println("line right:");
   // Serial.println(line_right->isLineDetected());
-  Serial.println(encoder_left->getCount());
-  Serial.println(encoder_right->getCount());
+  // Serial.println("Left encoder:");
+  // Serial.println(encoder_left->getCount());
+  // Serial.println("Right encoder:");
+  // Serial.println(encoder_right->getCount());
+  Serial.println("Ultrasonic front up:");
+  Serial.println(ultrasonic_frontUp->getDistance());
+  Serial.println("Ultrasonic front down:");
+  Serial.println(ultrasonic_frontDown->getDistance());
+  Serial.println("Ultrasonic left:");
+  Serial.println(ultrasonic_left->getDistance());
+  Serial.println("Ultrasonic right:");
+  Serial.println(ultrasonic_right->getDistance());
 
   delay(150);
 
