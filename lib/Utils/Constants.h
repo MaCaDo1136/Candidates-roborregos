@@ -26,3 +26,5 @@
 #define COLOR_B_S2 42
 #define COLOR_B_S3 40
 #define COLOR_B_OUT 44
+
+#define MOTOR_LEFT_PWM

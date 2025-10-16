@@ -1,5 +1,6 @@
 #include <Arduino.h>
-// #include <TimerTwo.h>
+#include <TimerOne.h>
+#include <Timers.h>
 #include <LineSensor.h>
 #include <EncoderSensor.h>
 #include <UltrasonicSensor.h>
@@ -25,20 +26,20 @@ void printing()
   // Serial.println(line_left->isLineDetected());
   // Serial.println("line right:");
   // Serial.println(line_right->isLineDetected());
-  Serial.println("L: ");
-  Serial.println(encoder_left->getCount());
-  Serial.println("R: ");
-  Serial.println(encoder_right->getCount());
+  // Serial.println("L: ");
+  // Serial.println(encoder_left->getCount());
+  // Serial.println("R: ");
+  // Serial.println(encoder_right->getCount());
   // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_LEFT));
   // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_RIGHT));
-  //   Serial.println("Ultrasonic front up:");
-  //   Serial.println(ultrasonic_frontUp->getDistance());
-  //   Serial.println("Ultrasonic front down:");
-  //   Serial.println(ultrasonic_frontDown->getDistance());
-  //   Serial.println("Ultrasonic left:");
-  //   Serial.println(ultrasonic_left->getDistance());
-  //   Serial.println("Ultrasonic right:");
-  //   Serial.println(ultrasonic_right->getDistance());
+  Serial.println("up:");
+  Serial.println(ultrasonic_frontUp->getDistance());
+  // Serial.println("down:");
+  // Serial.println(ultrasonic_frontDown->getDistance());
+  // Serial.println("left:");
+  // Serial.println(ultrasonic_left->getDistance());
+  // Serial.println("right:");
+  // Serial.println(ultrasonic_right->getDistance());
 }
 
 void setup()
@@ -71,7 +72,9 @@ void setup()
   ultrasonic_left->init();
   ultrasonic_right = new UltrasonicSensor(ULTRASONIC_RIGHT_TRIG, ULTRASONIC_RIGHT_ECHO);
   ultrasonic_right->init();
-  myTimer.createTimer(1, UltrasonicSensor::timerChecker, true);
+  // myTimer.createTimer(1, UltrasonicSensor::timerChecker, true);
+  Timer2.attachInterrupt(UltrasonicSensor::timerChecker);
+  Timer2.init(100);
 
   // pinMode(LED_BUILTIN, OUTPUT); // Initialize the digital pin as an output
   myLed = new MyLED(LED_BUILTIN);

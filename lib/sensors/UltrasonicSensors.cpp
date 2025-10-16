@@ -1,6 +1,7 @@
 #include "UltrasonicSensor.h"
 
 UltrasonicSensor *UltrasonicSensor::instances[20] = {nullptr};
+bool UltrasonicSensor::listening[20] = {false};
 int UltrasonicSensor::amountSensors = 0;
 bool UltrasonicSensor::stage = true;
 
@@ -21,27 +22,17 @@ void UltrasonicSensor::init()
 
 void UltrasonicSensor::timerChecker()
 {
-    if (stage)
+    for (int i = 0; i < 20; i++)
     {
-        for (int i = 0; i < 20; i++)
+        if (!listening[i])
         {
-            if (instances[i])
-            {
-                instances[i]->trigger();
-            }
+            instances[i]->trigger();
+            listening[i] = true;
         }
-        stage = false;
-    }
-    else
-    {
-        for (int i = 0; i < 20; i++)
+        else
         {
-            if (instances[i])
-            {
-                instances[i]->handleEchoInterrupt();
-            }
+            instances[i]->handleEchoInterrupt();
         }
-        stage = true;
     }
 }
 
@@ -51,7 +42,7 @@ void UltrasonicSensor::trigger()
     delay(2);
     digitalWrite(trig_pin_, HIGH);
     delay(10);
-    echo_start_ = millis();
+    echo_start_ = micros();
     digitalWrite(trig_pin_, LOW);
 };
 
@@ -68,17 +59,32 @@ float UltrasonicSensor::getDistance()
     return last_distance_;
 };
 
-void UltrasonicSensor::handleEchoInterrupt() {
-    // echo_end_ = millis();
-    // long duration = pulseIn
-    // echo_received_ = true;
-    // last_distance_ = getDistance();
+void UltrasonicSensor::handleEchoInterrupt()
+{
+    bool current_echo_state = digitalRead(echo_pin_);
+
+    if (!current_echo_state)
+    {
+        echo_end_ = micros();
+        if (echo_end_ > echo_start_)
+        {
+            last_distance_ = (echo_end_ - echo_start_) * 0.01715f;
+        }
+        listening[sensor_id_] = false;
+        return;
+    }
+    if ((micros() - echo_start_) > 30000)
+    {
+        listening[sensor_id_] = false;
+        return;
+    }
 };
 
 void UltrasonicSensor::attachSensor(UltrasonicSensor *sens)
 {
     if (amountSensors < 20)
     {
+        sens->sensor_id_ = amountSensors;
         instances[amountSensors++] = sens;
     }
 }

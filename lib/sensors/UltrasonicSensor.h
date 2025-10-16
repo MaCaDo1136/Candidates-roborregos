@@ -21,11 +21,13 @@ public:
 private:
     int trig_pin_;
     int echo_pin_;
+    int sensor_id_;
     volatile uint32_t echo_start_ = 0;
     volatile uint32_t echo_end_ = 0;
     volatile bool echo_received_ = false;
     float last_distance_ = 0;
     static UltrasonicSensor *instances[20]; // Max 20 sensors
+    static bool listening[20];
     static int amountSensors;
     static bool stage;
 };
