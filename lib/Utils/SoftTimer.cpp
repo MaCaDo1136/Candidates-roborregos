@@ -80,6 +80,20 @@ bool SoftTimer::startTimer(int timer_id)
     return true;
 }
 
+bool SoftTimer::startAllTimers()
+{
+    bool checking = false;
+    for (int i = 0; i < MAX_TIMERS; i++)
+    {
+        if (timers[i].used)
+        {
+            startTimer(i);
+            checking = true;
+        }
+    }
+    return checking;
+}
+
 bool SoftTimer::stopTimer(int timer_id)
 {
     if (timer_id < 0 || timer_id >= MAX_TIMERS || !timers[timer_id].used)

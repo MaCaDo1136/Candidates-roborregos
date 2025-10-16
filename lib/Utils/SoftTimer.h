@@ -13,6 +13,7 @@ public:
     // Timer management
     int createTimer(unsigned long interval_ms, void (*callback)(), bool repeat = true);
     bool startTimer(int timer_id);
+    bool startAllTimers();
     bool stopTimer(int timer_id);
     bool resetTimer(int timer_id);
     bool deleteTimer(int timer_id);
