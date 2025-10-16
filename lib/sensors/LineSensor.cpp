@@ -14,14 +14,17 @@ LineSensor::LineSensor(int pin)
 
 void LineSensor::init()
 {
-    pinMode(pin_, INPUT);
+    pinMode(pin_, INPUT_PULLUP);
 };
 
 void LineSensor::timerChecker()
 {
-    for (LineSensor *instance : instances)
+    for (int i = 0; i < 10; i++)
     {
-        instance->handleInterrupt();
+        if (instances[i])
+        {
+            instances[i]->handleInterrupt();
+        }
     }
 }
 
