@@ -4,11 +4,15 @@
 #include <LineSensor.h>
 #include <EncoderSensor.h>
 #include <UltrasonicSensor.h>
+#include <Odometry.h>
 #include <SoftTimer.h>
 #include <Constants.h>
 #include <MyLED.h>
 #include <Motors.h>
 #include <LineFollower.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_MPU6050.h>
+#include <Wire.h>
 
 // Easter egg
 
@@ -25,87 +29,11 @@ Motor *motor_intake;
 Motor *motor_right;
 Motor *motor_left;
 LineFollower *lineFollower;
+Odometry *myOdom;
+int current_time;
 
-void printing()
-{
-  // Serial.println("line left:");
-  // Serial.println(line_left->isLineDetected());
-  // Serial.println("line right:");
-  // Serial.println(line_right->isLineDetected());
-  // Serial.println("L: ");
-  // Serial.println(encoder_left->getCount());
-  // Serial.println("R: ");
-  // Serial.println(encoder_right->getCount());
-  // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_LEFT));
-  // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_RIGHT));
-  // Serial.println("up:");
-  // Serial.println(ultrasonic_frontUp->getDistance());
-  // Serial.println("down:");
-  // Serial.println(ultrasonic_frontDown->getDistance());
-  // Serial.println("left:");
-  // Serial.println(ultrasonic_left->getDistance());
-  // Serial.println("right:");
-  // Serial.println(ultrasonic_right->getDistance());
-}
-
-void setup()
-{
-
-  Serial.begin(9600);
-  SoftTimer myTimer = SoftTimer();
-  // Timer for line_sensors
-  line_left = new LineSensor(LINESENSOR_LEFT);
-  line_left->init();
-  line_right = new LineSensor(LINESENSOR_RIGHT);
-  line_right->init();
-  myTimer.init(50);
-  myTimer.createTimer(10, LineSensor::timerChecker, true);
-  // pinMode(LINESENSOR_LEFT, INPUT_PULLUP);
-  // pinMode(LINESENSOR_RIGHT, INPUT_PULLUP);
-
-  // Init encoder sensors
-  encoder_left = new EncoderSensor(ENCODERSENSOR_LEFT);
-  encoder_left->init();
-  encoder_right = new EncoderSensor(ENCODERSENSOR_RIGHT);
-  encoder_right->init();
-
-  // Init Ultrasonic sensors
-  ultrasonic_frontUp = new UltrasonicSensor(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
-  ultrasonic_frontUp->init();
-  ultrasonic_frontDown = new UltrasonicSensor(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO);
-  ultrasonic_frontDown->init();
-  ultrasonic_left = new UltrasonicSensor(ULTRASONIC_LEFT_TRIG, ULTRASONIC_LEFT_ECHO);
-  ultrasonic_left->init();
-  ultrasonic_right = new UltrasonicSensor(ULTRASONIC_RIGHT_TRIG, ULTRASONIC_RIGHT_ECHO);
-  ultrasonic_right->init();
-  // myTimer.createTimer(1, UltrasonicSensor::timerChecker, true);
-  // Timer2.attachInterrupt(UltrasonicSensor::timerChecker);
-  // Timer2.init(100);
-
-  // Init motors
-  motor_right = new Motor(MOTOR_RIGHT_PWM, MOTOR_RIGHT_IN1, MOTOR_RIGHT_IN2);
-  motor_right->init();
-  motor_intake = new Motor(MOTOR_INTAKE_PWM, MOTOR_INTAKE_IN1, MOTOR_INTAKE_IN2);
-  motor_intake->init();
-  motor_left = new Motor(MOTOR_LEFT_PWM, MOTOR_LEFT_IN1, MOTOR_LEFT_IN2);
-  motor_left->init();
-
-  // pinMode(LED_BUILTIN, OUTPUT); // Initialize the digital pin as an output
-  myLed = new MyLED(LED_BUILTIN);
-
-  // Set up printing with soft timer
-  myTimer.createTimer(100, printing, true);
-  // Finally start all timers
-  myTimer.startAllTimers();
-
-  // LineFollower setup
-  lineFollower = new LineFollower(line_left, line_right, motor_left, motor_right);
-  lineFollower->setInverted(false, true);
-  lineFollower->setSpeeds(120, 80, 100); // base, turn, spin
-  lineFollower->setDebounce(4);
-  lineFollower->setTimeout(400);
-  lineFollower->init();
-}
+Adafruit_MPU6050 mpu;
+sensors_event_t event;
 
 // lectura de sensores ultrasonicos
 
@@ -133,6 +61,136 @@ float getUltrasonicDistance(int trigPin, int echoPin)
   return distance;
 }
 
+void printing()
+{
+  // Serial.println("line left:");
+  // Serial.println(line_left->isLineDetected());
+  // Serial.println("line right:");
+  // Serial.println(line_right->isLineDetected());
+  // Serial.println("L: ");
+  // Serial.println(encoder_left->getCount());
+  // Serial.println("R: ");
+  // Serial.println(encoder_right->getCount());
+  // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_LEFT));
+  // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_RIGHT));
+  // Serial.println("up: ");
+  // Serial.println(getUltrasonicDistance(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO));
+
+  Serial.print("Odometry: ");
+  Serial.print("X: ");
+  Serial.print(myOdom->getX());
+  Serial.print(", Y: ");
+  Serial.print(myOdom->getY());
+  Serial.print(", Head: ");
+  Serial.println(myOdom->getTheta());
+
+  /*
+  Serial.print("[");
+  Serial.print(millis());
+  Serial.print("] X: ");
+  Serial.print(event.acceleration.x);
+  Serial.print(", Y: ");
+  Serial.print(event.acceleration.y);
+  Serial.print(", Z: ");
+  Serial.print(event.acceleration.z);
+  Serial.println(" m/s^2");
+
+  */
+
+  /*
+  Serial.print("[");
+  Serial.print(millis());
+  Serial.print("] X: ");
+  Serial.print(event.gyro.x);
+  Serial.print(", Y: ");
+  Serial.print(event.gyro.y);
+  Serial.print(", Z: ");
+  Serial.print(event.gyro.z);
+  Serial.println(" Gyro position");
+*/
+
+  // Serial.print("Heading: ");
+  // Serial.println(event.gyro.heading);
+  //  Serial.println("up:");
+  //  Serial.println(ultrasonic_frontUp->getDistance());
+  //  Serial.println("down:");
+  //  Serial.println(ultrasonic_frontDown->getDistance());
+  //  Serial.println("left:");
+  //  Serial.println(ultrasonic_left->getDistance());
+  //  Serial.println("right:");
+  //  Serial.println(ultrasonic_right->getDistance());
+}
+
+void setup()
+{
+
+  Serial.begin(9600);
+  SoftTimer myTimer = SoftTimer();
+  // Timer for line_sensors
+  line_left = new LineSensor(LINESENSOR_LEFT);
+  line_left->init();
+  line_right = new LineSensor(LINESENSOR_RIGHT);
+  line_right->init();
+  myTimer.init(50);
+  myTimer.createTimer(10, LineSensor::timerChecker, true);
+  // pinMode(LINESENSOR_LEFT, INPUT_PULLUP);
+  // pinMode(LINESENSOR_RIGHT, INPUT_PULLUP);
+
+  // Init encoder sensors
+  encoder_left = new EncoderSensor(ENCODERSENSOR_LEFT, ENCODERSENSOR_LEFT_ANALOG);
+  encoder_left->init();
+  encoder_right = new EncoderSensor(ENCODERSENSOR_RIGHT, ENCODERSENSOR_RIGHT_ANALOG);
+  encoder_right->init();
+
+  // Init Ultrasonic sensors
+  ultrasonic_frontUp = new UltrasonicSensor(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
+  ultrasonic_frontUp->init();
+  ultrasonic_frontDown = new UltrasonicSensor(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO);
+  ultrasonic_frontDown->init();
+  ultrasonic_left = new UltrasonicSensor(ULTRASONIC_LEFT_TRIG, ULTRASONIC_LEFT_ECHO);
+  ultrasonic_left->init();
+  ultrasonic_right = new UltrasonicSensor(ULTRASONIC_RIGHT_TRIG, ULTRASONIC_RIGHT_ECHO);
+  ultrasonic_right->init();
+  // myTimer.createTimer(1, UltrasonicSensor::timerChecker, true);
+  // Timer2.attachInterrupt(UltrasonicSensor::timerChecker);
+  // Timer2.init(100);
+
+  // Init motors
+  motor_right = new Motor(MOTOR_RIGHT_PWM, MOTOR_RIGHT_IN1, MOTOR_RIGHT_IN2);
+  motor_right->init();
+  motor_intake = new Motor(MOTOR_INTAKE_PWM, MOTOR_INTAKE_IN1, MOTOR_INTAKE_IN2);
+  motor_intake->init();
+  motor_left = new Motor(MOTOR_LEFT_PWM, MOTOR_LEFT_IN1, MOTOR_LEFT_IN2);
+  motor_left->init();
+
+  // Start Odometry
+  myOdom = new Odometry(WHEEL_RADIUS, BASE_LENGTH, TICK_REV);
+  //  pinMode(LED_BUILTIN, OUTPUT); // Initialize the digital pin as an output
+  myLed = new MyLED(LED_BUILTIN);
+
+  while (!mpu.begin())
+  {
+    Serial.println("MPU6050 not connected!");
+    delay(1000);
+  }
+
+  // Set up printing with soft timer
+  myTimer.createTimer(100, printing, true);
+  // Finally start all timers
+
+  myTimer.startAllTimers();
+
+  // LineFollower setup
+  lineFollower = new LineFollower(line_left, line_right, motor_left, motor_right);
+  lineFollower->setInverted(false, true);
+  lineFollower->setSpeeds(120, 80, 100); // base, turn, spin
+  lineFollower->setDebounce(4);
+  lineFollower->setTimeout(400);
+  lineFollower->init();
+
+  current_time = micros();
+}
+
 // Modos para elegir la pista:
 enum Mode
 {
@@ -142,17 +200,19 @@ enum Mode
 
 void loop()
 {
-  // myLed->turnOn();
-  // delay(200);
-  // myLed->turnOff();
-  // delay(200);
+  Mode currentMode = MODE_TEST_INTAKE;
 
-  Mode currentMode = MODE_LINE_FOLLOW;
-
+  // Update everything
   float distance = getUltrasonicDistance(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
   float distance_down = getUltrasonicDistance(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO);
   float distance_left = getUltrasonicDistance(ULTRASONIC_LEFT_TRIG, ULTRASONIC_LEFT_ECHO);
   float distance_right = getUltrasonicDistance(ULTRASONIC_RIGHT_TRIG, ULTRASONIC_RIGHT_ECHO);
+  // mpu.getAccelerometerSensor()->getEvent(&event);
+  mpu.getGyroSensor()->getEvent(&event);
+  // float gyroX = event.gyro.x + GYROX_CORRECTION;
+  // float gyroY = event.gyro.y + GYROY_CORRECTION;
+  float gyroZ = event.gyro.z + GYROZ_CORRECTION;
+  myOdom->update(encoder_left->getCount(), encoder_right->getCount(), 0, gyroZ);
 
   switch (currentMode)
   {
@@ -160,7 +220,7 @@ void loop()
     // lineFollower->update();
     break;
   case MODE_TEST_INTAKE:
-    if (distance > 0 && distance < 15)
+    if (distance_down > -1.1 && distance_down < 4)
     {
       motor_intake->setSpeed(0);
     }
