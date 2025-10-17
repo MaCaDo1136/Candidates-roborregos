@@ -2,9 +2,10 @@
 
 EncoderSensor *EncoderSensor::instances[2] = {nullptr};
 
-EncoderSensor::EncoderSensor(int pin)
+EncoderSensor::EncoderSensor(int pin, int analog_pin)
 {
     pin_ = pin;
+    analog_pin_ = analog_pin;
 };
 
 void EncoderSensor::init()
@@ -50,6 +51,10 @@ void EncoderSensor::handleInterrupt()
     }
 }
 
+int EncoderSensor::getAnalog()
+{
+    return analogRead(analog_pin_);
+}
 /*
 void EncoderSensor::staticInterruptHandler(uint gpio, uint32_t events)
 {

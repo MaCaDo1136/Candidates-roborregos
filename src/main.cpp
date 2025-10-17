@@ -4,6 +4,7 @@
 #include <LineSensor.h>
 #include <EncoderSensor.h>
 #include <UltrasonicSensor.h>
+#include <Odometry.h>
 #include <SoftTimer.h>
 #include <Constants.h>
 #include <MyLED.h>
@@ -28,6 +29,8 @@ Motor *motor_intake;
 Motor *motor_right;
 Motor *motor_left;
 LineFollower *lineFollower;
+Odometry *myOdom;
+int current_time;
 
 Adafruit_MPU6050 mpu;
 sensors_event_t event;
@@ -73,6 +76,15 @@ void printing()
   // Serial.println("up: ");
   // Serial.println(getUltrasonicDistance(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO));
 
+  Serial.print("Odometry: ");
+  Serial.print("X: ");
+  Serial.print(myOdom->getX());
+  Serial.print(", Y: ");
+  Serial.print(myOdom->getY());
+  Serial.print(", Head: ");
+  Serial.println(myOdom->getTheta());
+
+  /*
   Serial.print("[");
   Serial.print(millis());
   Serial.print("] X: ");
@@ -83,6 +95,9 @@ void printing()
   Serial.print(event.acceleration.z);
   Serial.println(" m/s^2");
 
+  */
+
+  /*
   Serial.print("[");
   Serial.print(millis());
   Serial.print("] X: ");
@@ -92,15 +107,18 @@ void printing()
   Serial.print(", Z: ");
   Serial.print(event.gyro.z);
   Serial.println(" Gyro position");
+*/
 
-  // Serial.println("up:");
-  // Serial.println(ultrasonic_frontUp->getDistance());
-  // Serial.println("down:");
-  // Serial.println(ultrasonic_frontDown->getDistance());
-  // Serial.println("left:");
-  // Serial.println(ultrasonic_left->getDistance());
-  // Serial.println("right:");
-  // Serial.println(ultrasonic_right->getDistance());
+  // Serial.print("Heading: ");
+  // Serial.println(event.gyro.heading);
+  //  Serial.println("up:");
+  //  Serial.println(ultrasonic_frontUp->getDistance());
+  //  Serial.println("down:");
+  //  Serial.println(ultrasonic_frontDown->getDistance());
+  //  Serial.println("left:");
+  //  Serial.println(ultrasonic_left->getDistance());
+  //  Serial.println("right:");
+  //  Serial.println(ultrasonic_right->getDistance());
 }
 
 void setup()
@@ -119,9 +137,9 @@ void setup()
   // pinMode(LINESENSOR_RIGHT, INPUT_PULLUP);
 
   // Init encoder sensors
-  encoder_left = new EncoderSensor(ENCODERSENSOR_LEFT);
+  encoder_left = new EncoderSensor(ENCODERSENSOR_LEFT, ENCODERSENSOR_LEFT_ANALOG);
   encoder_left->init();
-  encoder_right = new EncoderSensor(ENCODERSENSOR_RIGHT);
+  encoder_right = new EncoderSensor(ENCODERSENSOR_RIGHT, ENCODERSENSOR_RIGHT_ANALOG);
   encoder_right->init();
 
   // Init Ultrasonic sensors
@@ -145,7 +163,9 @@ void setup()
   motor_left = new Motor(MOTOR_LEFT_PWM, MOTOR_LEFT_IN1, MOTOR_LEFT_IN2);
   motor_left->init();
 
-  // pinMode(LED_BUILTIN, OUTPUT); // Initialize the digital pin as an output
+  // Start Odometry
+  myOdom = new Odometry(WHEEL_RADIUS, BASE_LENGTH, TICK_REV);
+  //  pinMode(LED_BUILTIN, OUTPUT); // Initialize the digital pin as an output
   myLed = new MyLED(LED_BUILTIN);
 
   while (!mpu.begin())
@@ -167,6 +187,8 @@ void setup()
   lineFollower->setDebounce(4);
   lineFollower->setTimeout(400);
   lineFollower->init();
+
+  current_time = micros();
 }
 
 // Modos para elegir la pista:
@@ -187,6 +209,10 @@ void loop()
   float distance_right = getUltrasonicDistance(ULTRASONIC_RIGHT_TRIG, ULTRASONIC_RIGHT_ECHO);
   // mpu.getAccelerometerSensor()->getEvent(&event);
   mpu.getGyroSensor()->getEvent(&event);
+  // float gyroX = event.gyro.x + GYROX_CORRECTION;
+  // float gyroY = event.gyro.y + GYROY_CORRECTION;
+  float gyroZ = event.gyro.z + GYROZ_CORRECTION;
+  myOdom->update(encoder_left->getCount(), encoder_right->getCount(), 0, gyroZ);
 
   switch (currentMode)
   {
