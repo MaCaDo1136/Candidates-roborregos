@@ -9,6 +9,7 @@
 #include <MyLED.h>
 #include <Motors.h>
 #include <LineFollower.h>
+// #include <Adafruit_MPU6050.h> // Commented out: install Adafruit_MPU6050 library and update includePath if you need this sensor
 
 // Easter egg
 
