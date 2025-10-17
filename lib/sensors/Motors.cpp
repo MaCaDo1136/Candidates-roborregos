@@ -1,9 +1,11 @@
-Motor ::Motor(int pinPWM, int pinIN1, int pinIN2)
+#include <Motors.h>
+
+Motor::Motor(int pinPWM, int pinIN1, int pinIN2)
     : pinPWM_(pinPWM), pinIN1_(pinIN1), pinIN2_(pinIN2)
 {
 }
 
-void Motor ::init()
+void Motor::init()
 {
     pinMode(pinPWM_, OUTPUT);
     pinMode(pinIN1_, OUTPUT);

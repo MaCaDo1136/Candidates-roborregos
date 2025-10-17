@@ -11,7 +11,7 @@ public:
     void stop();
 
 private:
-    int _pinPWM_;
-    int _pinIN1_;
-    int _pinIN2_;
+    int pinPWM_;
+    int pinIN1_;
+    int pinIN2_;
 };
