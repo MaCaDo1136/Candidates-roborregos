@@ -157,17 +157,17 @@ void loop()
   switch (currentMode)
   {
   case MODE_LINE_FOLLOW:
-    lineFollower->update();
+    // lineFollower->update();
     break;
   case MODE_TEST_INTAKE:
-    // if (distance > 0 && distance < 15)
-    // {
-    //   motor_intake->setSpeed(0);
-    // }
-    // else
-    // {
-    //   motor_intake->setSpeed(-254);
-    // }
+    if (distance > 0 && distance < 15)
+    {
+      motor_intake->setSpeed(0);
+    }
+    else
+    {
+      motor_intake->setSpeed(-254);
+    }
     break;
   default:
     break;
