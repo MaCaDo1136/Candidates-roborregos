@@ -9,7 +9,9 @@
 #include <MyLED.h>
 #include <Motors.h>
 #include <LineFollower.h>
-// #include <Adafruit_MPU6050.h> // Commented out: install Adafruit_MPU6050 library and update includePath if you need this sensor
+#include <Adafruit_Sensor.h>
+#include <Adafruit_MPU6050.h>
+#include <Wire.h>
 
 // Easter egg
 
@@ -26,6 +28,9 @@ Motor *motor_intake;
 Motor *motor_right;
 Motor *motor_left;
 LineFollower *lineFollower;
+
+Adafruit_MPU6050 mpu;
+sensors_event_t event;
 
 // lectura de sensores ultrasonicos
 
@@ -65,8 +70,29 @@ void printing()
   // Serial.println(encoder_right->getCount());
   // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_LEFT));
   // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_RIGHT));
-  Serial.println("up: ");
-  Serial.println(getUltrasonicDistance(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO));
+  // Serial.println("up: ");
+  // Serial.println(getUltrasonicDistance(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO));
+
+  Serial.print("[");
+  Serial.print(millis());
+  Serial.print("] X: ");
+  Serial.print(event.acceleration.x);
+  Serial.print(", Y: ");
+  Serial.print(event.acceleration.y);
+  Serial.print(", Z: ");
+  Serial.print(event.acceleration.z);
+  Serial.println(" m/s^2");
+
+  Serial.print("[");
+  Serial.print(millis());
+  Serial.print("] X: ");
+  Serial.print(event.gyro.x);
+  Serial.print(", Y: ");
+  Serial.print(event.gyro.y);
+  Serial.print(", Z: ");
+  Serial.print(event.gyro.z);
+  Serial.println(" Gyro position");
+
   // Serial.println("up:");
   // Serial.println(ultrasonic_frontUp->getDistance());
   // Serial.println("down:");
@@ -122,9 +148,16 @@ void setup()
   // pinMode(LED_BUILTIN, OUTPUT); // Initialize the digital pin as an output
   myLed = new MyLED(LED_BUILTIN);
 
+  while (!mpu.begin())
+  {
+    Serial.println("MPU6050 not connected!");
+    delay(1000);
+  }
+
   // Set up printing with soft timer
   myTimer.createTimer(100, printing, true);
   // Finally start all timers
+
   myTimer.startAllTimers();
 
   // LineFollower setup
@@ -147,10 +180,13 @@ void loop()
 {
   Mode currentMode = MODE_TEST_INTAKE;
 
+  // Update everything
   float distance = getUltrasonicDistance(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
   float distance_down = getUltrasonicDistance(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO);
   float distance_left = getUltrasonicDistance(ULTRASONIC_LEFT_TRIG, ULTRASONIC_LEFT_ECHO);
   float distance_right = getUltrasonicDistance(ULTRASONIC_RIGHT_TRIG, ULTRASONIC_RIGHT_ECHO);
+  // mpu.getAccelerometerSensor()->getEvent(&event);
+  mpu.getGyroSensor()->getEvent(&event);
 
   switch (currentMode)
   {
