@@ -26,6 +26,32 @@ Motor *motor_right;
 Motor *motor_left;
 LineFollower *lineFollower;
 
+// lectura de sensores ultrasonicos
+
+float getUltrasonicDistance(int trigPin, int echoPin)
+{
+  // Asegurar que el TRIG esté en LOW
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  // Enviar pulso de 10 microsegundos
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Leer duración del pulso de respuesta
+  long duration = pulseIn(echoPin, HIGH, 30000); // timeout de 30 ms
+
+  // Calcular distancia en centímetros
+  float distance = duration * 0.01715f;
+
+  // Si no hubo lectura válida (timeout)
+  if (duration == 0)
+    return -1.0;
+
+  return distance;
+}
+
 void printing()
 {
   // Serial.println("line left:");
@@ -38,6 +64,8 @@ void printing()
   // Serial.println(encoder_right->getCount());
   // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_LEFT));
   // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_RIGHT));
+  Serial.println("up: ");
+  Serial.println(getUltrasonicDistance(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO));
   // Serial.println("up:");
   // Serial.println(ultrasonic_frontUp->getDistance());
   // Serial.println("down:");
@@ -107,32 +135,6 @@ void setup()
   lineFollower->init();
 }
 
-// lectura de sensores ultrasonicos
-
-float getUltrasonicDistance(int trigPin, int echoPin)
-{
-  // Asegurar que el TRIG esté en LOW
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-
-  // Enviar pulso de 10 microsegundos
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  // Leer duración del pulso de respuesta
-  long duration = pulseIn(echoPin, HIGH, 30000); // timeout de 30 ms
-
-  // Calcular distancia en centímetros
-  float distance = duration * 0.01715f;
-
-  // Si no hubo lectura válida (timeout)
-  if (duration == 0)
-    return -1.0;
-
-  return distance;
-}
-
 // Modos para elegir la pista:
 enum Mode
 {
@@ -142,12 +144,7 @@ enum Mode
 
 void loop()
 {
-  // myLed->turnOn();
-  // delay(200);
-  // myLed->turnOff();
-  // delay(200);
-
-  Mode currentMode = MODE_LINE_FOLLOW;
+  Mode currentMode = MODE_TEST_INTAKE;
 
   float distance = getUltrasonicDistance(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
   float distance_down = getUltrasonicDistance(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO);
@@ -160,7 +157,7 @@ void loop()
     // lineFollower->update();
     break;
   case MODE_TEST_INTAKE:
-    if (distance > 0 && distance < 15)
+    if (distance_down > -1.1 && distance_down < 4)
     {
       motor_intake->setSpeed(0);
     }
