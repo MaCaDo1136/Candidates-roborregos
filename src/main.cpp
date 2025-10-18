@@ -75,7 +75,7 @@ void printing()
   // Serial.println(digitalPinToInterrupt(ENCODERSENSOR_RIGHT));
   // Serial.println("up: ");
   // Serial.println(getUltrasonicDistance(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO));
-
+  /*
   Serial.print("Odometry: ");
   Serial.print("X: ");
   Serial.print(myOdom->getX());
@@ -83,6 +83,17 @@ void printing()
   Serial.print(myOdom->getY());
   Serial.print(", Head: ");
   Serial.println(myOdom->getTheta());
+*/
+  /*
+  Serial.print("L Analog: ");
+  Serial.print(encoder_left->getAnalog());
+  Serial.print(", R Analog: ");
+  Serial.println(encoder_right->getAnalog());
+*/
+  Serial.print("Analog: ");
+  Serial.print(analogRead(A8));
+  Serial.print(", Velocity (RPM): ");
+  Serial.println(encoder_left->getVelocityFromAnalog(25));
 
   /*
   Serial.print("[");

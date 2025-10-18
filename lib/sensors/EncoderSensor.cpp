@@ -55,6 +55,19 @@ int EncoderSensor::getAnalog()
 {
     return analogRead(analog_pin_);
 }
+
+float EncoderSensor::getVelocityFromAnalog(int maxRPM)
+{
+    int raw = analogRead(analog_pin_);
+    // center at ~512, map to -1..1
+    float norm = ((float)raw - 512.0f) / 512.0f;
+    if (norm > 1.0f)
+        norm = 1.0f;
+    if (norm < -1.0f)
+        norm = -1.0f;
+    float rpm = norm * (float)maxRPM;
+    return way ? rpm : -rpm;
+}
 /*
 void EncoderSensor::staticInterruptHandler(uint gpio, uint32_t events)
 {

@@ -9,6 +9,8 @@ public:
     void init();
     uint32_t getCount() { return count_; };
     double getRotations() { return (double)count_ / 20.0; };
+    int getAnalog();
+    float getVelocityFromAnalog(int maxRPM);
     void reset() { count_ = 0; };
 
     void printValue() override
@@ -24,7 +26,6 @@ private:
     static EncoderSensor *instances[2];
     void setForward() { way = true; };
     void setBackward() { way = false; };
-    int getAnalog();
     void handleInterrupt();
     static void interrupt0Handler();
     static void interrupt1Handler();
