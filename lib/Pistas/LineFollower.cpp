@@ -16,7 +16,7 @@ void LineFollower::followLine()
     {
         motorLeft->setSpeed(0);
         motorRight->setSpeed(0);
-        delay(60);
+        delay(100);
 
         motorLeft->setSpeed(turnSpeed);
         motorRight->setSpeed(-turnSpeed);
@@ -29,7 +29,7 @@ void LineFollower::followLine()
     {
         motorLeft->setSpeed(0);
         motorRight->setSpeed(0);
-        delay(60);
+        delay(100);
 
         motorLeft->setSpeed(0);
         motorRight->setSpeed(baseSpeed / 1.5);

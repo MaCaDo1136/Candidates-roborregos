@@ -13,6 +13,8 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_MPU6050.h>
 #include <Wire.h>
+#include <ColorSensor.h>
+#include <PistaA.h>
 
 // Easter egg
 
@@ -25,37 +27,15 @@ Motor *motor_intake;
 Motor *motor_right;
 Motor *motor_left;
 LineFollower *lineFollower;
+PistaA *pistaA;
+ColorSensor *colorSensorFront;
+ColorSensor *colorSensorBack;
+
 Odometry *myOdom;
 int current_time;
 
 Adafruit_MPU6050 mpu;
 sensors_event_t event;
-
-// lectura de sensores ultrasonicos
-
-float getUltrasonicDistance(int trigPin, int echoPin)
-{
-  // Asegurar que el TRIG esté en LOW
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-
-  // Enviar pulso de 10 microsegundos
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  // Leer duración del pulso de respuesta
-  long duration = pulseIn(echoPin, HIGH, 30000); // timeout de 30 ms
-
-  // Calcular distancia en centímetros
-  float distance = duration * 0.01715f;
-
-  // Si no hubo lectura válida (timeout)
-  if (duration == 0)
-    return -1.0;
-
-  return distance;
-}
 
 void printing()
 {
@@ -167,8 +147,19 @@ void setup()
 
   myTimer.startAllTimers();
 
+  // Color sensors setup
+  colorSensorFront = new ColorSensor(COLOR_F_S0, COLOR_F_S1, COLOR_F_S2, COLOR_F_S3, COLOR_F_OUT);
+  colorSensorFront->init();
+  colorSensorBack = new ColorSensor(COLOR_B_S0, COLOR_B_S1, COLOR_B_S2, COLOR_B_S3, COLOR_B_OUT);
+  colorSensorBack->init();
+
   // LineFollower setup
   lineFollower = new LineFollower(line_right, motor_right, motor_left);
+
+  // PistaA setup
+  // pistaA = new PistaA(motor_intake, motor_left, motor_right, colorSensorFront,
+  //                    ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO,
+  //                    ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
 
   current_time = micros();
 }
@@ -180,7 +171,8 @@ enum Mode
   MODE_PISTA_A,
   MODE_TEST_INTAKE,
   PHOTO_MODE,
-  MODE_MOTOR_TEST
+  MODE_MOTOR_TEST,
+  MODE_COLOR_SENSOR_TEST
 };
 
 void loop()
@@ -206,24 +198,52 @@ void loop()
     lineFollower->followLine();
     break;
   case MODE_PISTA_A:
+    pistaA->runPistaCompleta();
     break;
   case MODE_TEST_INTAKE:
-    if (distance_down > -1.1 && distance_down < 2)
+    if (distance_down > -1.1 && distance_down < 3)
     {
       motor_intake->setSpeed(0);
     }
     else
     {
-      motor_intake->setSpeed(-254);
+      motor_intake->setSpeed(250);
     }
     break;
   case PHOTO_MODE:
     myLed->turnOn();
     break;
   case MODE_MOTOR_TEST:
-    motor_left->setSpeed(150);
-    motor_right->setSpeed(150);
-    motor_intake->setSpeed(150);
+    motor_left->setSpeed(-80);
+    motor_right->setSpeed(-80);
+    delay(900);
+    motor_left->stop();
+    motor_right->stop();
+    delay(10000);
+    break;
+  case MODE_COLOR_SENSOR_TEST:
+    int r, g, b;
+    colorSensorFront->readColor(r, g, b);
+    if (g < r && r < b)
+    {
+      // Color amarillo
+      motor_intake->setSpeed(255);
+      delay(700);
+    }
+    else if (b < r && g < r)
+    {
+      // Color celeste
+      motor_intake->setSpeed(180);
+      delay(500);
+    }
+    else
+    {
+      // No se reconocio nada
+      motor_intake->setSpeed(-250);
+      delay(500);
+    }
+
+    delay(500);
     break;
   default:
     break;

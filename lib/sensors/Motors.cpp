@@ -34,7 +34,7 @@ void Motor ::setSpeed(int speed) // speed from -255 to 255
     }
 }
 
-void Motor ::stop()
+void Motor::stop()
 {
     digitalWrite(pinIN1_, LOW);
     digitalWrite(pinIN2_, LOW);
