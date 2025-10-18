@@ -195,12 +195,13 @@ void setup()
 enum Mode
 {
   MODE_LINE_FOLLOW,
-  MODE_TEST_INTAKE
+  MODE_TEST_INTAKE,
+  PHOTO_MODE
 };
 
 void loop()
 {
-  Mode currentMode = MODE_LINE_FOLLOW;
+  Mode currentMode = PHOTO_MODE;
 
   // Update everything
   float distance = getUltrasonicDistance(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
@@ -228,6 +229,9 @@ void loop()
     {
       motor_intake->setSpeed(-254);
     }
+    break;
+  case PHOTO_MODE:
+    myLed->turnOn();
     break;
   default:
     break;
