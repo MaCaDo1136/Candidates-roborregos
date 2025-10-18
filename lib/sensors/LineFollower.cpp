@@ -7,10 +7,10 @@ LineFollower::LineFollower(LineSensor *left, LineSensor *right, Motor *mLeft, Mo
     motor_left = mLeft;
     motor_right = mRight;
 
-    baseSpeed = 100;
-    turnSpeed = 60;
-    spinSpeed = 80;
-    debounceReads = 3;
+    baseSpeed = 80;
+    turnSpeed = 70;
+    spinSpeed = 60;
+    debounceReads = 1;
     lostTimeoutMs = 400;
 
     lastSeen = DIR_UNKNOWN;
@@ -19,7 +19,7 @@ LineFollower::LineFollower(LineSensor *left, LineSensor *right, Motor *mLeft, Mo
     alternateSpinDir = false;
 
     invertLeft = false;
-    invertRight = true;
+    invertRight = false;
 }
 
 void LineFollower::setSpeeds(int baseSpd, int turnSpd, int spinSpd)
@@ -61,11 +61,17 @@ void LineFollower::update()
 
     unsigned long now = millis();
 
+    // Helper para aplicar inversión
+    auto applyInvert = [&](Motor *motor, int speed, bool inverted)
+    {
+        motor->setSpeed(inverted ? -speed : speed);
+    };
+
     // === Caso ambos sensores ven línea ===
     if (leftDetected && rightDetected)
     {
-        motor_left->setSpeed(baseSpeed);
-        motor_right->setSpeed(baseSpeed);
+        applyInvert(motor_left, baseSpeed, invertLeft);
+        applyInvert(motor_right, baseSpeed, invertRight);
         lastSeen = DIR_UNKNOWN;
         lastSeenTime = now;
         return;
@@ -74,8 +80,8 @@ void LineFollower::update()
     // === Caso solo el izquierdo ===
     if (leftDetected && !rightDetected)
     {
-        motor_left->setSpeed(baseSpeed - turnSpeed);
-        motor_right->setSpeed(baseSpeed);
+        applyInvert(motor_left, baseSpeed - turnSpeed, invertLeft);
+        applyInvert(motor_right, baseSpeed, invertRight);
         lastSeen = DIR_LEFT;
         lastSeenTime = now;
         return;
@@ -84,8 +90,8 @@ void LineFollower::update()
     // === Caso solo el derecho ===
     if (rightDetected && !leftDetected)
     {
-        motor_left->setSpeed(baseSpeed);
-        motor_right->setSpeed(baseSpeed - turnSpeed);
+        applyInvert(motor_left, baseSpeed, invertLeft);
+        applyInvert(motor_right, baseSpeed - turnSpeed, invertRight);
         lastSeen = DIR_RIGHT;
         lastSeenTime = now;
         return;
@@ -94,26 +100,24 @@ void LineFollower::update()
     // === Ninguno detecta, pero aún dentro del timeout ===
     if ((now - lastSeenTime) < lostTimeoutMs && lastSeen != DIR_UNKNOWN)
     {
-        // Corrección suave: reduce turnSpeed a la mitad
         if (lastSeen == DIR_LEFT)
         {
-            motor_left->setSpeed(baseSpeed - turnSpeed / 2);
-            motor_right->setSpeed(baseSpeed);
+            applyInvert(motor_left, baseSpeed - turnSpeed / 1.5, invertLeft);
+            applyInvert(motor_right, baseSpeed, invertRight);
         }
         else if (lastSeen == DIR_RIGHT)
         {
-            motor_left->setSpeed(baseSpeed);
-            motor_right->setSpeed(baseSpeed - turnSpeed / 2);
+            applyInvert(motor_left, baseSpeed, invertLeft);
+            applyInvert(motor_right, baseSpeed - turnSpeed / 1.5, invertRight);
         }
         return;
     }
 
     // === Línea perdida totalmente ===
-    // Gira despacio sobre sí mismo para encontrarla
-    int spinLeft = alternateSpinDir ? 0 : spinSpeed;
-    int spinRight = alternateSpinDir ? spinSpeed : 0;
-    motor_left->setSpeed(spinLeft);
-    motor_right->setSpeed(spinRight);
+    int spinLeft = alternateSpinDir ? -spinSpeed : spinSpeed;
+    int spinRight = alternateSpinDir ? spinSpeed : -spinSpeed;
+    applyInvert(motor_left, spinLeft, invertLeft);
+    applyInvert(motor_right, spinRight, invertRight);
     alternateSpinDir = !alternateSpinDir;
 }
 

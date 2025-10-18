@@ -181,11 +181,11 @@ void setup()
   myTimer.startAllTimers();
 
   // LineFollower setup
-  lineFollower = new LineFollower(line_left, line_right, motor_left, motor_right);
-  lineFollower->setInverted(false, true);
-  lineFollower->setSpeeds(120, 80, 100); // base, turn, spin
-  lineFollower->setDebounce(4);
-  lineFollower->setTimeout(400);
+  lineFollower = new LineFollower(line_left, line_right, motor_right, motor_left);
+  lineFollower->setInverted(false, false);
+  lineFollower->setSpeeds(80, 60, 50); // base, turn, spin
+  lineFollower->setDebounce(1);
+  lineFollower->setTimeout(120);
   lineFollower->init();
 
   current_time = micros();
@@ -200,7 +200,7 @@ enum Mode
 
 void loop()
 {
-  Mode currentMode = MODE_TEST_INTAKE;
+  Mode currentMode = MODE_LINE_FOLLOW;
 
   // Update everything
   float distance = getUltrasonicDistance(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
@@ -208,19 +208,19 @@ void loop()
   float distance_left = getUltrasonicDistance(ULTRASONIC_LEFT_TRIG, ULTRASONIC_LEFT_ECHO);
   float distance_right = getUltrasonicDistance(ULTRASONIC_RIGHT_TRIG, ULTRASONIC_RIGHT_ECHO);
   // mpu.getAccelerometerSensor()->getEvent(&event);
-  mpu.getGyroSensor()->getEvent(&event);
+  // mpu.getGyroSensor()->getEvent(&event);
   // float gyroX = event.gyro.x + GYROX_CORRECTION;
   // float gyroY = event.gyro.y + GYROY_CORRECTION;
-  float gyroZ = event.gyro.z + GYROZ_CORRECTION;
-  myOdom->update(encoder_left->getCount(), encoder_right->getCount(), 0, gyroZ);
+  // float gyroZ = event.gyro.z + GYROZ_CORRECTION;
+  // myOdom->update(encoder_left->getCount(), encoder_right->getCount(), 0, gyroZ);
 
   switch (currentMode)
   {
   case MODE_LINE_FOLLOW:
-    // lineFollower->update();
+    lineFollower->update();
     break;
   case MODE_TEST_INTAKE:
-    if (distance_down > -1.1 && distance_down < 4)
+    if (distance_down > -1.1 && distance_down < 2)
     {
       motor_intake->setSpeed(0);
     }
@@ -232,5 +232,4 @@ void loop()
   default:
     break;
   }
-  delay(10);
 }
