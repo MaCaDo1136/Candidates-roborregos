@@ -13,6 +13,8 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_MPU6050.h>
 #include <Wire.h>
+#include <ColorSensor.h>
+#include <PistaA.h>
 
 // Easter egg
 
@@ -21,45 +23,19 @@ LineSensor *line_left;
 LineSensor *line_right;
 EncoderSensor *encoder_left;
 EncoderSensor *encoder_right;
-UltrasonicSensor *ultrasonic_frontUp;
-UltrasonicSensor *ultrasonic_frontDown;
-UltrasonicSensor *ultrasonic_left;
-UltrasonicSensor *ultrasonic_right;
 Motor *motor_intake;
 Motor *motor_right;
 Motor *motor_left;
 LineFollower *lineFollower;
+PistaA *pistaA;
+ColorSensor *colorSensorFront;
+ColorSensor *colorSensorBack;
+
 Odometry *myOdom;
 int current_time;
 
 Adafruit_MPU6050 mpu;
 sensors_event_t event;
-
-// lectura de sensores ultrasonicos
-
-float getUltrasonicDistance(int trigPin, int echoPin)
-{
-  // Asegurar que el TRIG esté en LOW
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-
-  // Enviar pulso de 10 microsegundos
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  // Leer duración del pulso de respuesta
-  long duration = pulseIn(echoPin, HIGH, 30000); // timeout de 30 ms
-
-  // Calcular distancia en centímetros
-  float distance = duration * 0.01715f;
-
-  // Si no hubo lectura válida (timeout)
-  if (duration == 0)
-    return -1.0;
-
-  return distance;
-}
 
 void printing()
 {
@@ -153,15 +129,6 @@ void setup()
   encoder_right = new EncoderSensor(ENCODERSENSOR_RIGHT, ENCODERSENSOR_RIGHT_ANALOG);
   encoder_right->init();
 
-  // Init Ultrasonic sensors
-  ultrasonic_frontUp = new UltrasonicSensor(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
-  ultrasonic_frontUp->init();
-  ultrasonic_frontDown = new UltrasonicSensor(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO);
-  ultrasonic_frontDown->init();
-  ultrasonic_left = new UltrasonicSensor(ULTRASONIC_LEFT_TRIG, ULTRASONIC_LEFT_ECHO);
-  ultrasonic_left->init();
-  ultrasonic_right = new UltrasonicSensor(ULTRASONIC_RIGHT_TRIG, ULTRASONIC_RIGHT_ECHO);
-  ultrasonic_right->init();
   // myTimer.createTimer(1, UltrasonicSensor::timerChecker, true);
   // Timer2.attachInterrupt(UltrasonicSensor::timerChecker);
   // Timer2.init(100);
@@ -191,13 +158,19 @@ void setup()
 
   myTimer.startAllTimers();
 
+  // Color sensors setup
+  colorSensorFront = new ColorSensor(COLOR_F_S0, COLOR_F_S1, COLOR_F_S2, COLOR_F_S3, COLOR_F_OUT);
+  colorSensorFront->init();
+  colorSensorBack = new ColorSensor(COLOR_B_S0, COLOR_B_S1, COLOR_B_S2, COLOR_B_S3, COLOR_B_OUT);
+  colorSensorBack->init();
+
   // LineFollower setup
-  lineFollower = new LineFollower(line_left, line_right, motor_left, motor_right);
-  lineFollower->setInverted(false, true);
-  lineFollower->setSpeeds(120, 80, 100); // base, turn, spin
-  lineFollower->setDebounce(4);
-  lineFollower->setTimeout(400);
-  lineFollower->init();
+  lineFollower = new LineFollower(line_right, motor_right, motor_left);
+
+  // PistaA setup
+  // pistaA = new PistaA(motor_intake, motor_left, motor_right, colorSensorFront,
+  //                    ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO,
+  //                    ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
 
   current_time = micros();
 }
@@ -206,12 +179,16 @@ void setup()
 enum Mode
 {
   MODE_LINE_FOLLOW,
-  MODE_TEST_INTAKE
+  MODE_PISTA_A,
+  MODE_TEST_INTAKE,
+  PHOTO_MODE,
+  MODE_MOTOR_TEST,
+  MODE_COLOR_SENSOR_TEST
 };
 
 void loop()
 {
-  Mode currentMode = MODE_TEST_INTAKE;
+  Mode currentMode = MODE_LINE_FOLLOW;
 
   // Update everything
   float distance = getUltrasonicDistance(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
@@ -219,29 +196,67 @@ void loop()
   float distance_left = getUltrasonicDistance(ULTRASONIC_LEFT_TRIG, ULTRASONIC_LEFT_ECHO);
   float distance_right = getUltrasonicDistance(ULTRASONIC_RIGHT_TRIG, ULTRASONIC_RIGHT_ECHO);
   // mpu.getAccelerometerSensor()->getEvent(&event);
-  mpu.getGyroSensor()->getEvent(&event);
+  // mpu.getGyroSensor()->getEvent(&event);
   // float gyroX = event.gyro.x + GYROX_CORRECTION;
   // float gyroY = event.gyro.y + GYROY_CORRECTION;
-  float gyroZ = event.gyro.z + GYROZ_CORRECTION;
-  myOdom->update(encoder_left->getCount(), encoder_right->getCount(), 0, gyroZ);
+  // float gyroZ = event.gyro.z + GYROZ_CORRECTION;
+  // myOdom->update(encoder_left->getCount(), encoder_right->getCount(), 0, gyroZ);
+  // float distance_down = 0;
 
   switch (currentMode)
   {
   case MODE_LINE_FOLLOW:
-    // lineFollower->update();
+    lineFollower->followLine();
+    break;
+  case MODE_PISTA_A:
+    pistaA->runPistaCompleta();
     break;
   case MODE_TEST_INTAKE:
-    if (distance_down > -1.1 && distance_down < 4)
+    if (distance_down > -1.1 && distance_down < 3)
     {
       motor_intake->setSpeed(0);
     }
     else
     {
-      motor_intake->setSpeed(-254);
+      motor_intake->setSpeed(250);
     }
+    break;
+  case PHOTO_MODE:
+    myLed->turnOn();
+    break;
+  case MODE_MOTOR_TEST:
+    motor_left->setSpeed(-80);
+    motor_right->setSpeed(-80);
+    delay(900);
+    motor_left->stop();
+    motor_right->stop();
+    delay(10000);
+    break;
+  case MODE_COLOR_SENSOR_TEST:
+    int r, g, b;
+    colorSensorFront->readColor(r, g, b);
+    if (g < r && r < b)
+    {
+      // Color amarillo
+      motor_intake->setSpeed(255);
+      delay(700);
+    }
+    else if (b < r && g < r)
+    {
+      // Color celeste
+      motor_intake->setSpeed(180);
+      delay(500);
+    }
+    else
+    {
+      // No se reconocio nada
+      motor_intake->setSpeed(-250);
+      delay(500);
+    }
+
+    delay(500);
     break;
   default:
     break;
   }
-  delay(10);
 }
