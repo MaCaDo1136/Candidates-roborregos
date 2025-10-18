@@ -15,6 +15,7 @@
 #include <Wire.h>
 #include <ColorSensor.h>
 #include <PistaA.h>
+#include <PistaC.h>
 
 // Easter egg
 
@@ -28,6 +29,7 @@ Motor *motor_right;
 Motor *motor_left;
 LineFollower *lineFollower;
 PistaA *pistaA;
+PistaC *pistaC;
 ColorSensor *colorSensorFront;
 ColorSensor *colorSensorBack;
 
@@ -52,14 +54,14 @@ void printing()
   // Serial.println("up: ");
   // Serial.println(getUltrasonicDistance(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO));
 
-  Serial.print("Odometry: ");
+  /*  Serial.print("Odometry: ");
   Serial.print("X: ");
   Serial.print(myOdom->getX());
   Serial.print(", Y: ");
   Serial.print(myOdom->getY());
   Serial.print(", Head: ");
   Serial.println(myOdom->getTheta());
-
+*/
   /*
   Serial.print("[");
   Serial.print(millis());
@@ -157,9 +159,13 @@ void setup()
   lineFollower = new LineFollower(line_right, motor_right, motor_left);
 
   // PistaA setup
-  // pistaA = new PistaA(motor_intake, motor_left, motor_right, colorSensorFront,
-  //                    ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO,
-  //                    ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
+  pistaA = new PistaA(motor_intake, motor_left, motor_right, colorSensorFront,
+                      ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO,
+                      ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
+
+  pistaC = new PistaC(motor_intake, motor_left, motor_right, colorSensorFront,
+                      ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO,
+                      ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
 
   current_time = micros();
 }
@@ -169,7 +175,8 @@ enum Mode
 {
   MODE_LINE_FOLLOW,
   MODE_PISTA_A,
-  MODE_TEST_INTAKE,
+  MODE_PISTA_C,
+  TEST,
   PHOTO_MODE,
   MODE_MOTOR_TEST,
   MODE_COLOR_SENSOR_TEST
@@ -177,7 +184,7 @@ enum Mode
 
 void loop()
 {
-  Mode currentMode = MODE_LINE_FOLLOW;
+  Mode currentMode = MODE_PISTA_C;
 
   // Update everything
   float distance = getUltrasonicDistance(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
@@ -194,32 +201,35 @@ void loop()
 
   switch (currentMode)
   {
+  case MODE_PISTA_C:
+    pistaC->runPistaCompleta();
+    break;
   case MODE_LINE_FOLLOW:
     lineFollower->followLine();
     break;
   case MODE_PISTA_A:
     pistaA->runPistaCompleta();
     break;
-  case MODE_TEST_INTAKE:
-    if (distance_down > -1.1 && distance_down < 3)
-    {
-      motor_intake->setSpeed(0);
-    }
-    else
-    {
-      motor_intake->setSpeed(250);
-    }
+  case TEST:
+
     break;
   case PHOTO_MODE:
     myLed->turnOn();
     break;
   case MODE_MOTOR_TEST:
-    motor_left->setSpeed(-80);
-    motor_right->setSpeed(-80);
+    /*
+    motor_left->setSpeed(-70);
+      motor_right->setSpeed(-92);
+      */
+    // pistaC->adelante();
+    pistaC->adelante();
     delay(900);
+    /*
     motor_left->stop();
     motor_right->stop();
     delay(10000);
+    motor_left->setSpeed(80);*/
+
     break;
   case MODE_COLOR_SENSOR_TEST:
     int r, g, b;

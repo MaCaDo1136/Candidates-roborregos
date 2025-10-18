@@ -1,7 +1,7 @@
-#include "PistaA.h"
+#include "PistaC.h"
 #include "UltrasonicSensor.h"
 
-PistaA::PistaA(Motor *intake, Motor *left, Motor *right, ColorSensor *sensor, int trigD, int echoD, int trigU, int echoU)
+PistaC::PistaC(Motor *intake, Motor *left, Motor *right, ColorSensor *sensor, int trigD, int echoD, int trigU, int echoU)
 {
     intakeMotor = intake;
     motorLeft = left;
@@ -21,7 +21,7 @@ PistaA::PistaA(Motor *intake, Motor *left, Motor *right, ColorSensor *sensor, in
     etapa5Completada = false;
 }
 
-void PistaA::init()
+void PistaC::init()
 {
     pinMode(trigDown, OUTPUT);
     pinMode(echoDown, INPUT);
@@ -29,94 +29,88 @@ void PistaA::init()
     pinMode(echoUp, INPUT);
 }
 
-void PistaA::runPistaCompleta()
+void PistaC::runPistaCompleta()
 {
     etapa1();
+    /*
     etapa2();
     etapa3();
     etapa4();
     etapa5();
+    */
 }
 
-void PistaA::buscarPelota()
+void PistaC::girar90GradosLeft()
 {
-
-    float distanciaDown = getUltrasonicDistance(trigDown, echoDown);
-
-    while (distanciaDown > 5.0 || distanciaDown == -1)
-    {
-        motorLeft->setSpeed(-120);
-        motorRight->setSpeed(-120);
-        // intakeMotor->setSpeed(255);
-        distanciaDown = getUltrasonicDistance(trigUp, echoUp);
-        delay(50);
-    }
-
+    motorLeft->setSpeed(-80);
+    motorRight->setSpeed(80);
+    delay(500);
     motorLeft->stop();
     motorRight->stop();
-    intakeMotor->stop();
-    delay(300);
-
-    int r, g, b;
-    colorSensor->readColor(r, g, b);
-
-    if (g < r && r < b)
-    {
-        // Color amarillo
-        intakeMotor->setSpeed(255);
-        delay(700);
-    }
-    else if (b < r && g < r)
-    {
-        // Color celeste
-        intakeMotor->setSpeed(180);
-        delay(500);
-    }
-    else
-    {
-        // No se reconocio nada
-        intakeMotor->setSpeed(-120);
-        delay(500);
-    }
-
-    intakeMotor->stop();
-
-    while (true)
-    {
-        float distanciaUp = getUltrasonicDistance(trigUp, echoUp);
-        if (distanciaUp > 25.0)
-        {
-            break;
-        }
-        delay(200);
-    }
-
-    motorLeft->stop();
-    motorRight->stop();
-    intakeMotor->stop();
+    delay(1500);
 }
 
-void PistaA::etapa1()
+void PistaC::girar90GradosRight()
 {
-    // if (etapa1Completada)
-    // {
-    //     intakeMotor->stop();
-    //     return;
-    // }
+    motorLeft->setSpeed(80);
+    motorRight->setSpeed(-80);
+    delay(500);
+    motorLeft->stop();
+    motorRight->stop();
+    delay(1500);
+}
+
+void PistaC::buscarPelota()
+{
+    //
+}
+
+void PistaC::adelante()
+{
+    motorLeft->setSpeed(-70);
+    motorRight->setSpeed(-92);
+    delay(1000);
+    motorLeft->stop();
+    motorRight->stop();
+    delay(1500);
+}
+
+void PistaC::etapa1()
+{
+    if (etapa1Completada)
+    {
+        return;
+    }
 
     // buscarPelota();
 
-    motorLeft->setSpeed(-180);
+    /*motorLeft->setSpeed(-180);
     motorRight->setSpeed(-180);
     delay(900);
     motorLeft->stop();
     motorRight->stop();
     delay(15000);
-
+*/
+    adelante();
+    girar90GradosRight();
+    adelante();
+    girar90GradosLeft();
+    adelante();
+    adelante();
+    girar90GradosLeft();
+    adelante();
+    adelante();
+    girar90GradosLeft();
+    adelante();
+    girar90GradosRight();
+    adelante();
+    girar90GradosRight();
+    adelante();
+    adelante();
     etapa1Completada = true;
 }
 
-void PistaA::etapa2()
+void PistaC::etapa2()
 {
     if (etapa2Completada)
     {
@@ -145,7 +139,7 @@ void PistaA::etapa2()
     etapa2Completada = true;
 }
 
-void PistaA::etapa3()
+void PistaC::etapa3()
 {
     if (etapa3Completada)
     {
@@ -189,7 +183,7 @@ void PistaA::etapa3()
     etapa3Completada = true;
 }
 
-void PistaA::etapa4()
+void PistaC::etapa4()
 {
     if (etapa4Completada)
     {
@@ -233,7 +227,7 @@ void PistaA::etapa4()
     etapa4Completada = true;
 }
 
-void PistaA::etapa5()
+void PistaC::etapa5()
 {
     if (etapa5Completada)
     {

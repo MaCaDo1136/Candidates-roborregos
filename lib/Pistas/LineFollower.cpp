@@ -18,10 +18,10 @@ void LineFollower::followLine()
         motorRight->setSpeed(0);
         delay(100);
 
-        motorLeft->setSpeed(turnSpeed);
+        motorLeft->setSpeed(turnSpeed + 40);
         motorRight->setSpeed(-turnSpeed);
         delay(30);
-        motorLeft->setSpeed(turnSpeed);
+        motorLeft->setSpeed(turnSpeed + 40);
         motorRight->setSpeed(-turnSpeed);
         delay(60);
     }
