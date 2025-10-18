@@ -21,10 +21,6 @@ LineSensor *line_left;
 LineSensor *line_right;
 EncoderSensor *encoder_left;
 EncoderSensor *encoder_right;
-UltrasonicSensor *ultrasonic_frontUp;
-UltrasonicSensor *ultrasonic_frontDown;
-UltrasonicSensor *ultrasonic_left;
-UltrasonicSensor *ultrasonic_right;
 Motor *motor_intake;
 Motor *motor_right;
 Motor *motor_left;
@@ -142,15 +138,6 @@ void setup()
   encoder_right = new EncoderSensor(ENCODERSENSOR_RIGHT, ENCODERSENSOR_RIGHT_ANALOG);
   encoder_right->init();
 
-  // Init Ultrasonic sensors
-  ultrasonic_frontUp = new UltrasonicSensor(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
-  ultrasonic_frontUp->init();
-  ultrasonic_frontDown = new UltrasonicSensor(ULTRASONIC_FRONTDOWN_TRIG, ULTRASONIC_FRONTDOWN_ECHO);
-  ultrasonic_frontDown->init();
-  ultrasonic_left = new UltrasonicSensor(ULTRASONIC_LEFT_TRIG, ULTRASONIC_LEFT_ECHO);
-  ultrasonic_left->init();
-  ultrasonic_right = new UltrasonicSensor(ULTRASONIC_RIGHT_TRIG, ULTRASONIC_RIGHT_ECHO);
-  ultrasonic_right->init();
   // myTimer.createTimer(1, UltrasonicSensor::timerChecker, true);
   // Timer2.attachInterrupt(UltrasonicSensor::timerChecker);
   // Timer2.init(100);
@@ -181,12 +168,7 @@ void setup()
   myTimer.startAllTimers();
 
   // LineFollower setup
-  lineFollower = new LineFollower(line_left, line_right, motor_right, motor_left);
-  lineFollower->setInverted(false, false);
-  lineFollower->setSpeeds(80, 60, 50); // base, turn, spin
-  lineFollower->setDebounce(1);
-  lineFollower->setTimeout(120);
-  lineFollower->init();
+  lineFollower = new LineFollower(line_right, motor_right, motor_left);
 
   current_time = micros();
 }
@@ -195,13 +177,15 @@ void setup()
 enum Mode
 {
   MODE_LINE_FOLLOW,
+  MODE_PISTA_A,
   MODE_TEST_INTAKE,
-  PHOTO_MODE
+  PHOTO_MODE,
+  MODE_MOTOR_TEST
 };
 
 void loop()
 {
-  Mode currentMode = PHOTO_MODE;
+  Mode currentMode = MODE_LINE_FOLLOW;
 
   // Update everything
   float distance = getUltrasonicDistance(ULTRASONIC_FRONTUP_TRIG, ULTRASONIC_FRONTUP_ECHO);
@@ -214,11 +198,14 @@ void loop()
   // float gyroY = event.gyro.y + GYROY_CORRECTION;
   // float gyroZ = event.gyro.z + GYROZ_CORRECTION;
   // myOdom->update(encoder_left->getCount(), encoder_right->getCount(), 0, gyroZ);
+  // float distance_down = 0;
 
   switch (currentMode)
   {
   case MODE_LINE_FOLLOW:
-    lineFollower->update();
+    lineFollower->followLine();
+    break;
+  case MODE_PISTA_A:
     break;
   case MODE_TEST_INTAKE:
     if (distance_down > -1.1 && distance_down < 2)
@@ -232,6 +219,11 @@ void loop()
     break;
   case PHOTO_MODE:
     myLed->turnOn();
+    break;
+  case MODE_MOTOR_TEST:
+    motor_left->setSpeed(150);
+    motor_right->setSpeed(150);
+    motor_intake->setSpeed(150);
     break;
   default:
     break;

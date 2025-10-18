@@ -6,39 +6,15 @@
 class LineFollower
 {
 private:
-    LineSensor *line_left;
-    LineSensor *line_right;
-    Motor *motor_left;
-    Motor *motor_right;
+    LineSensor *sensorRight;
+    Motor *motorLeft;
+    Motor *motorRight;
 
-    bool invertLeft;
-    bool invertRight;
-
+    int rightThreshold; // Umbral si lo necesitas (por ahora no)
     int baseSpeed;
     int turnSpeed;
-    int spinSpeed;
-    int debounceReads;
-    unsigned long lostTimeoutMs;
-
-    enum LastDir
-    {
-        DIR_UNKNOWN = 0,
-        DIR_LEFT = -1,
-        DIR_RIGHT = 1
-    };
-    LastDir lastSeen;
-    int leftCounter;
-    int rightCounter;
-    unsigned long lastSeenTime;
-    bool alternateSpinDir;
 
 public:
-    LineFollower(LineSensor *left, LineSensor *right, Motor *mLeft, Motor *mRight);
-
-    void setSpeeds(int baseSpd, int turnSpd, int spinSpd);
-    void setDebounce(int reads);
-    void setTimeout(unsigned long timeout);
-    void init();
-    void update(); // llamada principal en loop()
-    void setInverted(bool leftInv, bool rightInv);
+    LineFollower(LineSensor *sRight, Motor *mLeft, Motor *mRight);
+    void followLine();
 };
